@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Formu</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+   
+</head>
+
+<body>
+    <h1>Kayıt Formu</h1>
+    <div class="form-container">
+        <form action="/register" method="post">
+            <label for="isim">İsim:</label><br>
+            <input type="text" id="isim" name="isim" placeholder="isminiz"><br>
+            <label for="soyisim">Soy İsim:</label><br>
+            <input type="text" id="soyisim" name="soyisim" placeholder="soy isminiz"><br>
+            <label for="telefon_no">Telefon Numarası:</label><br>
+            <input type="text" id="telefon_no" name="telefon_no" placeholder="5** *** ****"><br>
+            <label for="adres">Adres:</label><br>
+            <input type="text" id="adres" name="adres"><br>
+            <button type="submit" class="btn">Kayıt Ol</button>
+        </form>
+    </div>
+</body>
+</html>
