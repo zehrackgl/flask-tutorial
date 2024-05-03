@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kayıt Formu</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='user.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -21,7 +22,7 @@
     </style>
 
 </head>
-<body>
+<body class= "bg-secondary text-white ">
     <div class="container">
         <h2 class="text-center mt-4">Kayıt Formu</h2>
         <form action="/veriekle" id="myform" method="post">
@@ -42,35 +43,55 @@
                 <textarea id="adres" name="adres" class="form-control"></textarea>
             </div>
             <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Kaydol</button>
+            <button type="submit" class="btn btn-success">Kaydol</button>
             </div>
             <script>
-            document.getElementById('myform').addEventListener('submit', function(event){
-                event.preventDefault();
-                Swal.fire({
-                    title: 'Kayıt Başarıyla Oluşturuldu',
-                    text: '',
-                    icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yeni Kayıt',
-                    //confirmButtonColor: "#0bde2b"
-                    cancelButtonText: 'Kayıtları Göster',
-                    reverseButtons: true
-                }
-                ).then((result)=> {
-                    if (result.isConfirmed){
-                        Swal.fire('Yeni Kayıt Oluşturulacak');
-                
-                    } else{
-                        window.location.href = '/';
-                    }
-                 
+                document.getElementById('myform').addEventListener('submit', function(event){
+                    event.preventDefault();
+                    $.ajax({
+                        url: '/veriekle',
+                        method: 'POST',
+                        data: $('#myform').serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Kayıt Başarıyla Oluşturuldu',
+                                    icon: 'success',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Yeni Kayıt',
+                                    cancelButtonText: 'Kayıtları Göster',
+                                    reverseButtons: true
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        Swal.fire('Yeni Kayıt Oluşturulacak');
+                                    } else {
+                                        window.location.href = '/';
+                                    }
+                                });
+            
+                                // Update DataTable with the new record
+                                var table = $('#data-table').DataTable();
+                                table.row.add([
+                                    response.user[1],
+                                    response.user[2],
+                                    response.user[3],
+                                    '<button type="button" class="btn btn-info btn-sm details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal' + response.user[0] + '"><i class="bi bi-eye-fill"></i></button>',
+                                    '<button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal' + response.user[0] + '"><i class="bi bi-pencil-fill"></i></button>',
+                                    '<button type="button" class="btn btn-danger btn-sm delete-btn" data-id="' + response.user[0] + '"><i class="bi bi-trash-fill"></i></button>'
+                                ]).draw();
+            
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                            Swal.fire('Error', 'An error occurred while adding record', 'error');
+                        }
+                    });
                 });
-            });
-
-
-
             </script>
+            
    
    
         </form>
@@ -78,4 +99,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
-

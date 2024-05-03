@@ -4,20 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anasayfa</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <!-- DataTables CSS for styling -->
+    <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- DataTables Buttons CSS -->
+    <link href="https://cdn.datatables.net/buttons/2.3.0/css/buttons.dataTables.min.css" rel="stylesheet">
+    <!-- Bootstrap ve DataTables Dark theme -->
+    <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap iconları -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- SweetAlert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style>
+
+        /* Hide default search box */
+        .dataTables_wrapper .dataTables_filter {
+            visibility: hidden;
+        }
+        /* Custom button colors */
+        .edit-btn {
+            background-color: #FAFF8E;
+        }
+
+        .delete-btn {
+            background-color: red;
+        }
+
+        .details-btn {
+            background-color: #8EE7FF;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-secondary text-white">
     <div class="container-md text-center">
         <h2 class="text-center mt-4">Anasayfa</h2>
-        <br> 
-        <table id="data-table" class="table table-hover table-bordered table-dark">
+        <label for="nameSearch">İsim ile Filtreleme Yapın:</label>
+        <input type="text" id="nameSearch" class="form-control mb-3" placeholder="İsim girin">
+        <table id="data-table" class="table table-dark table-hover table-bordered"> 
             <thead>
-                <tr class="table-secondary">
+                <tr class="table-primary">
                     <th scope="col">İsim</th>
                     <th scope="col">Soyisim</th>
                     <th scope="col">Telefon Numarası</th>
-                    <th scope="col">Adres</th>
+                    <th scope="col">Detaylar</th>
+                    <th scope="col">Düzenle</th>
+                    <th scope="col">Sil</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,25 +58,181 @@
                     <td>{{ veri[1] }}</td>
                     <td>{{ veri[2] }}</td>
                     <td>{{ veri[3] }}</td>
-                    <td>{{ veri[4] }}</td>
+                    <td>
+                        <!-- Detay butonu  -->
+                        <button type="button" class="btn btn-info btn-sm details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal{{ veri[0] }}">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <!-- Düzenle butonu  -->
+                        <button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal{{ veri[0] }}">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <!-- Sil butonu  -->
+                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ veri[0] }}">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </td>
                 </tr>
+                <!-- Modal kısmı -->
+                <div class="modal fade" id="detailsModal{{ veri[0] }}" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark text-white">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="detailsModalLabel"> {{ veri[1] }} {{ veri[2] }} için Detaylar </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>İsim:</strong> {{ veri[1] }}</p>
+                                <p><strong>Soyisim:</strong> {{ veri[2] }}</p>
+                                <p><strong>Telefon Numarası:</strong> {{ veri[3] }}</p>
+                                <p><strong>Adres:</strong> {{ veri[4] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Edit Modal kısmı -->
+                <div class="modal fade" id="editModal{{ veri[0] }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark text-white">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel"> {{ veri[1] }} {{ veri[2] }} için Düzenle </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm{{ veri[0] }}">
+                                    <div class="mb-3">
+                                        <label for="editIsim{{ veri[0] }}" class="form-label">İsim:</label>
+                                        <input type="text" id="editIsim{{ veri[0] }}" name="isim" class="form-control" value="{{ veri[1] }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editSoyisim{{ veri[0] }}" class="form-label">Soyisim:</label>
+                                        <input type="text" id="editSoyisim{{ veri[0] }}" name="soyisim" class="form-control" value="{{ veri[2] }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editTelefon{{ veri[0] }}" class="form-label">Telefon Numarası:</label>
+                                        <input type="text" id="editTelefon{{ veri[0] }}" name="telefon" class="form-control" value="{{ veri[3] }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editAdres{{ veri[0] }}" class="form-label">Adres:</label>
+                                        <textarea id="editAdres{{ veri[0] }}" name="adres" class="form-control">{{ veri[4] }}</textarea>
+                                    </div>
+                                    <button type="button" class="btn btn-success save-btn" data-id="{{ veri[0] }}">Kaydet</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </tbody>
         </table>
+
         <a href="{{ url_for('veri_ekle') }}" class="btn btn-success">Yeni Kayıt Oluştur</a>
+        <br>
     </div>
+    <!--  DataTables ve dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+    <!-- DataTables Buttons ve dependencies -->
+    <script src="https://cdn.datatables.net/buttons/2.3.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.0/js/buttons.html5.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
-    $(document).ready(function() {
-        $('#data-table').DataTable({
-            "language": {
-                "url": "https://cdn.datatables.net/plug-ins/1.12.1/i18n/tr.json"
-            }
+        $(document).ready(function() {
+            var table = $('#data-table').DataTable({
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.11.3/i18n/tr.json"
+                },
+                "dom": '<"topStart"Bf>rt<"bottom"lip>',
+                "buttons": [
+                    {
+                        text: 'CSV',
+                        extend: 'csvHtml5',
+                        className: 'btn btn-primary',
+                        titleAttr: 'Export CSV',
+                        exportOptions: {
+                            columns: [0, 1, 2]
+                        }
+                    }
+                ]
+            });
+
+            // isim ile filtreleme 
+            $('#nameSearch').on('keyup', function() {
+                table.column(0).search($(this).val()).draw();
+            });
+
+            // Edit button click 
+            $('.edit-btn').click(function() {
+                var userId = $(this).data('id');
+                $('#editModal' + userId).modal('show');
+            });
+
+            // Save button click 
+            $('.save-btn').click(function() {
+                var userId = $(this).data('id');
+                var formData = $('#editForm' + userId).serialize();
+    
+                $.ajax({
+                    url: '/update/' + userId,
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('#editModal' + userId).modal('hide');
+                        swal("Başarılı!", "Kayıt başarıyla güncellendi!", "success");
+                        
+                        // Update the row in DataTable with the edited data
+                        var index = table.row('#row-' + userId).index();
+                        var rowData = response.user;
+                        table.row(index).data(rowData).draw(); // Draw updated data
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                        swal("Hata!", "Kayıt güncellenirken bir hata oluştu!", "error");
+                    }
+                });
+            });
+            
+            // Delete button click 
+            $('.delete-btn').click(function() {
+                var userId = $(this).data('id');
+                var deleteButton = $(this);
+                
+                swal({
+                    title: "Emin misiniz?",
+                    text: "Bu kaydı silmek istediğinizden emin misiniz?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '/delete/' + userId,
+                            method: 'POST',
+                            success: function(response) {
+                                swal("Başarılı!", "Kayıt başarıyla silindi!", "success");
+                                // Remove deleted row table
+                                deleteButton.closest('tr').remove();
+        
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(xhr.responseText);
+                                swal("Hata!", "Kayıt silinirken bir hata oluştu!", "error");
+                            }
+                        });
+                    } else {
+                        swal("İşlem iptal edildi.");
+                    }
+                });
+            });
         });
-    });
     </script>
 </body>
 </html>
